@@ -24,7 +24,8 @@ import "math/rand"
 import "fmt"
 
 const (
-	LEADER = iota
+	//incremento de 1 em 1
+	LEADER = iota 
 	CANDIDATE
 	FLLOWER
 
@@ -162,8 +163,6 @@ func (rf *Raft) RequestVote(args RequestVoteArgs, reply *RequestVoteReply) {
 	index := rf.getLastIndex()
 	uptoDate := false
 
-
-
 	//If votedFor is null or candidateId, and candidate’s log is at least as up-to-date as receiver’s log, grant vote
 	//Raft determines which of two logs is more up-to-date by comparing the index and term of the last entries in the logs.
 	// If the logs have last entries with different terms,then the log with the later term is more up-to-date.
@@ -288,8 +287,6 @@ func (rf *Raft) sendAppendEntries(server int, args AppendEntriesArgs, reply *App
 		if reply.Success {
 			if len(args.Entries) > 0 {
 				rf.nextIndex[server] = args.Entries[len(args.Entries) - 1].LogIndex + 1
-				//reply.NextIndex
-				//rf.nextIndex[server] = reply.NextIndex
 				rf.matchIndex[server] = rf.nextIndex[server] - 1
 			}
 		} 
@@ -397,7 +394,6 @@ func Make(peers []*labrpc.ClientEnd, me int, //inicializa os servidores
 		rf.chanHeartbeat = make(chan bool, 100)
 		rf.chanGrantVote = make(chan bool, 100)
 		rf.chanLeader = make(chan bool, 100)
-		rf.chanApply = applyCh
 	
 		go func() {
 			for {
@@ -428,7 +424,7 @@ func Make(peers []*labrpc.ClientEnd, me int, //inicializa os servidores
 						case <-rf.chanLeader:
 							rf.mu.Lock()
 							rf.state = LEADER
-						//fmt.Printf("%v is Leader\n",rf.me)
+							//fmt.Printf("%v is Leader\n",rf.me)
 							rf.nextIndex = make([]int, len(rf.peers))
 							rf.matchIndex = make([]int, len(rf.peers))
 							for i := range rf.peers {
